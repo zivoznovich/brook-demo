@@ -1,12 +1,13 @@
 import streamlit as st
-from langchain_community.document_loaders import PyPDFLoader
+import re
+import tempfile
+import os
+
+from langchain.document_loaders import PyPDFLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-import re
-import tempfile
-import os
 
 # Load secrets
 USERNAME = st.secrets["AUTH_USERNAME"]
@@ -105,13 +106,13 @@ if uploaded_files and len(uploaded_files) >= 1:
         docs = loader.load_and_split()
         for doc in docs:
             doc.metadata["source_file"] = file.name
-            all_docs.extend(docs)
+        all_docs.extend(docs)
 
     embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OPENAI_API_KEY"])
     vectorstore = FAISS.from_documents(all_docs, embeddings)
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, openai_api_key=st.secrets["OPENAI_API_KEY"])
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=True
     )
