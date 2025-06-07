@@ -1,5 +1,6 @@
-langchain==0.3.25
-faiss-cpu
-openai
-streamlit
 pypdf
+streamlit
+langchain==0.3.25
+langchain_community
+openai
+faiss-cpu
